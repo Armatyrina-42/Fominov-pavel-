@@ -1,0 +1,11 @@
+A = int(input("Введите целое число A (должно быть больше B): "))
+B = int(input("Введите целое число B: "))
+
+if A > B:
+    print("Нечётные числа от A до B в порядке убывания:")
+    
+    for number in range(A, B - 1, -1):
+        if number % 2 != 0:
+            print(number)
+else:
+    print("Ошибка: A должно быть больше B.")
