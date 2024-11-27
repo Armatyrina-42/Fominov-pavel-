@@ -1,117 +1,121 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog
+from tkinter import ttk
+from tkinter import filedialog
+from tkinter import messagebox
 
-class App(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.title("ФИО автора")
-        self.geometry("400x300")
 
-        # Создаем вкладки
-        self.tab_control = tk.Notebook(self)
-        self.tab1 = tk.Frame(self.tab_control)
-        self.tab2 = tk.Frame(self.tab_control)
-        self.tab3 = tk.Frame(self.tab_control)
+def calculate():
+    try:
+        num1 = float(entry_num1.get())
+        num2 = float(entry_num2.get())
+        operation = operation_var.get()
 
-        self.tab_control.add(self.tab1, text='Калькулятор')
-        self.tab_control.add(self.tab2, text='Чекбоксы')
-        self.tab_control.add(self.tab3, text='Работа с текстом')
-
-        self.tab_control.pack(expand=1, fill='both')
-
-        # Вкладка 1: Калькулятор
-        self.create_calculator_tab()
-
-        # Вкладка 2: Чекбоксы
-        self.create_checkbox_tab()
-
-        # Вкладка 3: Работа с текстом
-        self.create_text_tab()
-
-    def create_calculator_tab(self):
-        self.num1_label = tk.Label(self.tab1, text="Число 1:")
-        self.num1_label.pack()
-        self.num1_entry = tk.Entry(self.tab1)
-        self.num1_entry.pack()
-
-        self.num2_label = tk.Label(self.tab1, text="Число 2:")
-        self.num2_label.pack()
-        self.num2_entry = tk.Entry(self.tab1)
-        self.num2_entry.pack()
-
-        self.operation_label = tk.Label(self.tab1, text="Операция:")
-        self.operation_label.pack()
-        self.operation_var = tk.StringVar(self.tab1)
-        self.operation_var.set("+")
-        self.operation_menu = tk.OptionMenu(self.tab1, self.operation_var, "+", "-", "*", "/")
-        self.operation_menu.pack()
-
-        self.calculate_button = tk.Button(self.tab1, text="Вычислить", command=self.calculate)
-        self.calculate_button.pack()
-
-        self.result_label = tk.Label(self.tab1, text="Результат:")
-        self.result_label.pack()
-        self.result_var = tk.StringVar()
-        self.result_entry = tk.Entry(self.tab1, textvariable=self.result_var, state='readonly')
-        self.result_entry.pack()
-
-    def calculate(self):
-        try:
-            num1 = float(self.num1_entry.get())
-            num2 = float(self.num2_entry.get())
-            operation = self.operation_var.get()
-
-            if operation == "+":
-                result = num1 + num2
-            elif operation == "-":
-                result = num1 - num2
-            elif operation == "*":
-                result = num1 * num2
-            elif operation == "/":
-                if num2 != 0:
-                    result = num1 / num2
-                else:
-                    messagebox.showerror("Ошибка", "Деление на ноль невозможно")
-                    return
-
-            self.result_var.set(result)
-        except ValueError:
-            messagebox.showerror("Ошибка", "Введите корректные числа")
-
-    def create_checkbox_tab(self):
-        self.checkbox_vars = [tk.BooleanVar() for _ in range(3)]
-        self.checkboxes = []
-
-        for i, var in enumerate(self.checkbox_vars):
-            checkbox = tk.Checkbutton(self.tab2, text=f"Вариант {i+1}", variable=var)
-            checkbox.pack()
-            self.checkboxes.append(checkbox)
-
-        self.show_selection_button = tk.Button(self.tab2, text="Показать выбор", command=self.show_selection)
-        self.show_selection_button.pack()
-
-    def show_selection(self):
-        selected = [i+1 for i, var in enumerate(self.checkbox_vars) if var.get()]
-        if selected:
-            messagebox.showinfo("Выбор", f"Вы выбрали варианты: {', '.join(map(str, selected))}")
+        if operation == "+":
+            result = num1 + num2
+        elif operation == "-":
+            result = num1 - num2
+        elif operation == "*":
+            result = num1 * num2
+        elif operation == "/":
+            if num2 == 0:
+                result = "Division by zero!"
+            else:
+                result = num1 / num2
         else:
-            messagebox.showinfo("Выбор", "Вы ничего не выбрали")
+            result = "Invalid operation"
 
-    def create_text_tab(self):
-        self.text_area = tk.Text(self.tab3, height=10, width=50)
-        self.text_area.pack()
+        result_label.config(text=f"Результат: {result}")
+    except ValueError:
+        result_label.config(text="Invalid input")
 
-        self.load_button = tk.Button(self.tab3, text="Загрузить текст", command=self.load_text)
-        self.load_button.pack()
 
-    def load_text(self):
-        file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
-        if file_path:
-            with open(file_path, 'r', encoding='utf-8') as file:
+def checkbox_clicked():
+    choices = []
+    if var1.get():
+        choices.append("Первый")
+    if var2.get():
+        choices.append("Второй")
+    if var3.get():
+        choices.append("Третий")
+
+    if choices:
+        messagebox.showinfo("Выбор", f"Вы выбрали: {', '.join(choices)}")
+    else:
+        messagebox.showwarning("Выбор", "Вы ничего не выбрали")
+
+
+def open_file():
+    filepath = filedialog.askopenfilename(
+        defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
+    )
+    if filepath:
+        try:
+            with open(filepath, "r", encoding="utf-8") as file:
                 text = file.read()
-                self.text_area.delete(1.0, tk.END)
-                self.text_area.insert(tk.END, text)
+                text_area.delete("1.0", tk.END)
+                text_area.insert(tk.END, text)
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Ошибка при открытии файла: {e}")
 
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+
+root = tk.Tk()
+root.title("Фоминов П.А.")
+
+# Notebook (tabs)
+notebook = ttk.Notebook(root)
+notebook.pack(expand=True, fill="both")
+
+# Calculator
+tab1 = ttk.Frame(notebook)
+notebook.add(tab1, text="Калькулятор")
+
+entry_num1 = tk.Entry(tab1)
+entry_num1.grid(row=0, column=0)
+
+operation_var = tk.StringVar(tab1)
+operation_var.set("+")
+operation_menu = tk.OptionMenu(tab1, operation_var, "+", "-", "*", "/")
+operation_menu.grid(row=0, column=1)
+
+entry_num2 = tk.Entry(tab1)
+entry_num2.grid(row=0, column=2)
+
+calculate_button = tk.Button(tab1, text="Вычислить", command=calculate)
+calculate_button.grid(row=0, column=3)
+
+result_label = tk.Label(tab1, text="Результат:")
+result_label.grid(row=1, column=0, columnspan=4)
+
+# Checkboxes
+tab2 = ttk.Frame(notebook)
+notebook.add(tab2, text="Чекбоксы")
+
+var1 = tk.BooleanVar()
+check1 = tk.Checkbutton(tab2, text="Первый", variable=var1)
+check1.pack()
+
+var2 = tk.BooleanVar()
+check2 = tk.Checkbutton(tab2, text="Второй", variable=var2)
+check2.pack()
+
+var3 = tk.BooleanVar()
+check3 = tk.Checkbutton(tab2, text="Третий", variable=var3)
+check3.pack()
+
+checkbox_button = tk.Button(tab2, text="Показать выбор", command=checkbox_clicked)
+checkbox_button.pack()
+
+# Text Editor
+tab3 = ttk.Frame(notebook)
+notebook.add(tab3, text="Текстовый редактор")
+
+menubar = tk.Menu(root)
+filemenu = tk.Menu(menubar, tearoff=0)
+filemenu.add_command(label="Открыть", command=open_file)
+menubar.add_cascade(label="Файл", menu=filemenu)
+root.config(menu=menubar)
+
+text_area = tk.Text(tab3, wrap=tk.WORD)
+text_area.pack(expand=True, fill="both")
+
+root.mainloop()
